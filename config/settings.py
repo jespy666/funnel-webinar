@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from dotenv import load_dotenv
 import os
 
@@ -7,6 +9,8 @@ from typing import Optional
 
 
 load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 @dataclass
@@ -21,7 +25,7 @@ class DBConfig:
     def get_connection_url(self) -> str:
         match self.db_type:
             case db if db == 'sqlite':
-                return f'sqlite+aiosqlite:///{self.db_name}'
+                return f'sqlite+aiosqlite:////{BASE_DIR}/{self.db_name}'
             case db if db == 'postgres':
                 return (
                     f"postgresql+asyncpg://{self.db_user}:{self.db_password}"

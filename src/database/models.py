@@ -36,9 +36,9 @@ class User(Base):
     )
     status_updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP,
-        nullable=False,
         unique=False,
         onupdate=func.now(),
+        default=datetime.utcnow(),
     )
 
     def __repr__(self):

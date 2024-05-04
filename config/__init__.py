@@ -1,7 +1,7 @@
-from .settings import DB_CONFIG, TGConfig
+from .settings import DB_CONFIG, TG_CONFIG
 
 
 __all__ = (
     'DB_CONFIG',
-    'TGConfig',
+    'TG_CONFIG',
 )
