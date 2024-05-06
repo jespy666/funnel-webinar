@@ -5,3 +5,4 @@ funnel.db
 *.pyc
 __pycache__/
 config/__pycache__/
+*.session
