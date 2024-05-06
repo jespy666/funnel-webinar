@@ -1,12 +1,19 @@
+from datetime import datetime
+
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     mapped_column,
     declared_attr
 )
-from sqlalchemy.dialects.sqlite import TIMESTAMP
-from sqlalchemy import func, Enum
-from datetime import datetime
+from sqlalchemy import func, Enum, Integer
+
+from config import DB_CONFIG
+
+if DB_CONFIG.db_type == 'postgres':
+    from sqlalchemy.dialects.postgresql import TIMESTAMP
+else:
+    from sqlalchemy.dialects.sqlite import TIMESTAMP
 
 
 class Base(DeclarativeBase):
@@ -37,8 +44,18 @@ class User(Base):
     status_updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP,
         unique=False,
-        onupdate=func.now(),
+        nullable=True,
+        default=None,
+    )
+    last_message_sent: Mapped[datetime] = mapped_column(
+        TIMESTAMP,
+        unique=False,
         default=datetime.utcnow(),
+    )
+    current_stage: Mapped[int] = mapped_column(
+        Integer,
+        unique=False,
+        default=0,
     )
 
     def __repr__(self):
