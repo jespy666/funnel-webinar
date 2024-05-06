@@ -37,10 +37,12 @@ class DBConfig:
 
 @dataclass
 class TGConfig:
+    name: str
     api_id: int
     api_hash: str
 
 
+# Config database
 DB_CONFIG = DBConfig(
     db_type=os.getenv('DB_TYPE'),
     db_name=os.getenv('DB_NAME'),
@@ -50,7 +52,25 @@ DB_CONFIG = DBConfig(
     db_port=os.getenv('DB_PORT'),
 )
 
+# Config Pyrogram client
 TG_CONFIG = TGConfig(
+    name='Your client name',
     api_id=int(os.getenv('API_ID')),
     api_hash=os.getenv('API_HASH'),
 )
+
+# Text in funnel messages
+MESSAGE1 = 'Текст 1'
+MESSAGE2 = 'Текст 2'
+MESSAGE3 = 'Текст 3'
+
+# Triggers for interrupt funnel
+TRIGGERS = ['прекрасно', 'ожидать']
+
+# Message delay time (in minutes)
+STAGE_1 = 1  # 6 minutes by technical task
+STAGE_2 = 1  # 39 minutes by technical task
+STAGE_3 = 1  # 1740 minutes by technical task
+
+# While True task loop delay (in seconds)
+LOOP_DELAY = 30
