@@ -30,6 +30,7 @@ class MessageFunnelTracker(CRUD):
         return {
             user.id: settings.MESSAGE2 for user in users
             if user.status == 'alive'
+            and not user.trigger
             and user.current_stage == 1
             and (user.last_message_sent + target) < datetime.utcnow()
         }

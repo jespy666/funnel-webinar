@@ -10,18 +10,16 @@ class StageControl(CRUD):
         super().__init__()
         self.user_id = user_id
 
-    async def get_stage(self) -> int:
-        user: User = await super().get_user(self.user_id)
-        return user.current_stage
-
     async def setup_by_stage(self, now: datetime) -> None:
-        current_stage: int = await self.get_stage()
+        user: User = await super().get_user(self.user_id)
+        current_stage: int = user.current_stage
+        trigger: bool = user.trigger
         fields_to_setup = {'last_message_sent': now}
         match current_stage:
             case s if s == 0:
-                next_stage = 1
+                next_stage = 1 if not trigger else 2
             case s if s == 1:
-                next_stage = 2
+                next_stage = 2 if not trigger else 3
             case s if s == 2:
                 fields_to_setup['status'] = 'finished'
                 fields_to_setup['status_updated_at'] = now

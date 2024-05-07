@@ -64,13 +64,15 @@ MESSAGE1 = 'Текст 1'
 MESSAGE2 = 'Текст 2'
 MESSAGE3 = 'Текст 3'
 
-# Triggers for interrupt funnel
-TRIGGERS = ['прекрасно', 'ожидать']
+# Triggers for finished funnel
+FINISH_TRIGGERS = ['прекрасно', 'ожидать']
+# Triggers for next funnel stage
+CANCEL_TRIGGERS = ['триггер1']
 
 # Message delay time (in minutes)
-STAGE_1 = 1  # 6 minutes by technical task
-STAGE_2 = 1  # 39 minutes by technical task
-STAGE_3 = 1  # 1740 minutes by technical task
+STAGE_1 = 6  # 6 minutes by technical task
+STAGE_2 = 39  # 39 minutes by technical task
+STAGE_3 = 1740  # 1740 minutes by technical task
 
 # While True task loop delay (in seconds)
 LOOP_DELAY = 30

@@ -29,35 +29,38 @@ app = Client(
 async def handle_msg(_, msg: Message) -> None:
     outgoing_msg = msg.outgoing
     # check type of message (incoming / outgoing)
-    if outgoing_msg:
-        user_id: int = msg.chat.id
-        logger.info('Сообщение отправлено пользователю: {}', user_id)
-    else:
-        user_id: int = msg.from_user.id
-        logger.info('Новое сообщение от пользователя: {}', user_id)
+    user_id: int = msg.chat.id if outgoing_msg else msg.from_user.id
+    text: list = msg.text.lower().split()
     user: User | None = await CRUD().get_user(user_id)
+    now = datetime.utcnow()
     # create new user if not exist
     if not user:
-        user: User = await CRUD().create_user(user_id)
-        logger.info('Добавлен новый пользователь: {}', user_id)
-    msg_text: str = msg.text
-    # check for triggers in message
-    if any(word in msg_text.lower().split() for word in settings.TRIGGERS):
-        # check if user already get first stage funnel message
-        if 1 <= user.current_stage < 3:
-            now = datetime.utcnow()
-            if outgoing_msg:
-                logger.warning('Найден триггер в сообщении ассистента!')
-            else:
-                logger.warning('Найден триггер в сообщении пользователя!')
+        await CRUD().create_user(user_id)
+        logger.info('Новый пользователь в воронке: {}', user_id)
+    if outgoing_msg:
+        current_stage: int = user.current_stage
+        if any(word in text for word in settings.CANCEL_TRIGGERS):
+            if 1 <= current_stage < 3:
+                next_stage = current_stage + 1
+                logger.warning('Триггер на следующий этап: {}', user_id)
+                await CRUD().update_user(
+                    user_id,
+                    current_stage=next_stage,
+                    last_message_sent=now,
+                    trigger=True,
+                )
+        if any(word in text for word in settings.FINISH_TRIGGERS):
+            logger.warning('Найден завершающий триггер: {}', user_id)
             await CRUD().update_user(
                 user_id,
+                current_stage=3,
                 status='finished',
-                current_stage=2,
-                last_message_sent=now,
                 status_updated_at=now,
+                last_message_sent=now,
             )
-            logger.warning('Воронка для пользователя: {} завершена!', user_id)
+        logger.info('Сообщение отправлено пользователю: {}', user_id)
+    else:
+        logger.info('Сообщение от пользователя: {}', user_id)
 
 
 async def funnel_task() -> None:
@@ -69,12 +72,11 @@ async def funnel_task() -> None:
             try:
                 await app.send_message(user_id, message)
                 logger.success(
-                    'Сообщение было успешно отправлено пользователю: {}',
+                    'Сообщение воронки успешно отправлено пользователю: {}',
                     user_id,
                 )
                 # set up user for next stage
                 await StageControl(user_id).setup_by_stage(datetime.utcnow())
-                logger.success('STAGE UPGRADED')
             except FloodWait as e:
                 logger.warning(
                     'Превышен лимит сообщений {}\nОжидание...',
@@ -96,13 +98,13 @@ async def funnel_task() -> None:
 
 
 async def run():
-    try:
-        logger.success('Юзербот успешно запущен')
-        # run msg handler and while true task as parallel
-        await asyncio.gather(app.start(), funnel_task())
-    finally:
-        logger.warning('Юзербот остановлен')
+    # run msg handler and while true task as parallel
+    await asyncio.gather(app.start(), funnel_task())
 
 
 if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(run())
+    try:
+        logger.success('Юзербот успешно запущен')
+        asyncio.get_event_loop().run_until_complete(run())
+    finally:
+        logger.critical('Юзербот остановлен')
