@@ -6,7 +6,7 @@ from sqlalchemy.orm import (
     mapped_column,
     declared_attr
 )
-from sqlalchemy import func, Enum, Integer
+from sqlalchemy import func, Enum, Integer, Boolean
 
 from config import DB_CONFIG
 
@@ -56,6 +56,11 @@ class User(Base):
         Integer,
         unique=False,
         default=0,
+    )
+    trigger: Mapped[bool] = mapped_column(
+        Boolean,
+        unique=False,
+        default=False,
     )
 
     def __repr__(self):
